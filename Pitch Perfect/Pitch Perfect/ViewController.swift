@@ -10,11 +10,23 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var recordingLabel: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        print("View did load")
     }
-
+    
+    @IBAction func startRecording(_ sender: Any) {
+        print("Start recording clicked")
+        recordingLabel.text = "Recording started.. Click Stop Recording to stop."
+    }
+    
+    @IBAction func stopRecoding(_ sender: Any) {
+        print("Stop recording clicked")
+        recordingLabel.text = "Recording stoped.. Click start Recording to start."
+    }
+    
 
 }
 
