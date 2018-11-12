@@ -25,6 +25,12 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         check_record_permission()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        stopRecordingButton.isEnabled = false
+        recordingLabel.text = "Tap to record"
+    }
+    
     func check_record_permission()
     {
         switch AVAudioSession.sharedInstance().recordPermission{
@@ -48,12 +54,6 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         }
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        stopRecordingButton.isEnabled = false
-        recordingLabel.text = "Tap to record"
-    }
-    
     func getDocumentsDirectory() -> URL
     {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -69,11 +69,7 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     @IBAction func startRecording(_ sender: Any) {
-        print("Start recording clicked")
-        recordingLabel.text = "Recording in Progress"
-        startRecordingButton.isEnabled = false
-        stopRecordingButton.isEnabled = true
-        
+        //print("Start recording clicked")
         if isAudioRecordingGranted
         {
             let session = AVAudioSession.sharedInstance()
@@ -92,6 +88,8 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
                 audioRecorder.isMeteringEnabled = true
                 audioRecorder.prepareToRecord()
                 audioRecorder.record()
+                
+                toggleUI(true)
             }
             catch _ {
                 recordingLabel.text = "Error setting up audio recorder"
@@ -104,22 +102,24 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     @IBAction func stopRecoding(_ sender: Any) {
-        print("Stop recording clicked")
-        recordingLabel.text = "Tap to Record"
-        startRecordingButton.isEnabled = true
-        stopRecordingButton.isEnabled = false
-        
+        //print("Stop recording clicked")
         audioRecorder.stop()
         audioRecorder = nil
+        
+        toggleUI(false)
     }
     
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        print("Finished recording")
+        //print("Finished recording")
         if flag {
             performSegue(withIdentifier: "stopRecording", sender: recorder.url)
         } else {
             print("Recording was not successful")
         }
+    }
+
+    func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+        print(error?.localizedDescription ?? "No error")
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -129,10 +129,12 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
             playSoundVC.recordedAudioURL = recordedAudioURL
         }
     }
-
-    func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
-        print(error?.localizedDescription ?? "No error")
+    
+    // UI Functions
+    func toggleUI(_ isRecording: Bool) {
+        recordingLabel.text = isRecording ? "Recording in progress" : "Tap to record"
+        startRecordingButton.isEnabled = !isRecording
+        stopRecordingButton.isEnabled = isRecording
     }
-
 }
 
